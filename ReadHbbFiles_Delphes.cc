@@ -184,6 +184,8 @@ int ReadHGGFiles_Delphes(std::string infile, std::string outfile, std::string ou
 
   TH1F *h_InvariantMass_PhPh=new TH1F("h_InvariantMass_PhPh", "Di-photon invariant mass; m_{#gamma#gamma} [GeV]; Events/GeV", 9000, 0, 300); h_InvariantMass_PhPh->Sumw2();
 
+  TH1F *h_InvariantMass_bb=new TH1F("h_InvariantMass_bb", "bb invariant mass; m_{bb} [GeV]; Events/GeV", 9000, 0, 300); h_InvariantMass_bb->Sumw2();
+
   int nEvents=tree->GetEntries();
   std::cout << "nEvents= " << nEvents << std::endl;
   for (int i=0; i<nEvents ; ++i)
@@ -320,7 +322,7 @@ int ReadHGGFiles_Delphes(std::string infile, std::string outfile, std::string ou
         }
       if(isGoodJet) Jet_vector.push_back(Jet); 
      }//close four vector if 
-       if(fabs(jets.at(k).eta)<2.4 and jets.at(k).pT>25.0 and jets.at(k).btag==1)
+       if(fabs(jets.at(k).eta)<2.4 and jets.at(k).pT>25.0 and jets.at(k).btag>0)
        {
        bJet.SetPtEtaPhiM(jets.at(k).pT, jets.at(k).eta, jets.at(k).phi, jets.at(k).mass);
 
@@ -368,6 +370,16 @@ int ReadHGGFiles_Delphes(std::string infile, std::string outfile, std::string ou
      HTb += bJet_vector.at(m).Pt();
     }
 
+  TLorentzVector bJet1;
+  bJet1.SetPtEtaPhiE(0, 0, 0, 0);
+  TLorentzVector bJet2;
+  bJet2.SetPtEtaPhiE(0, 0, 0, 0);
+  if(Jet_vector.size()>1){ //assuming that the highest pT jets are b-jets
+    bJet1.SetPtEtaPhiE(Jet_vector.at(0).Pt(), Jet_vector.at(0).Eta(), Jet_vector.at(0).Phi(), Jet_vector.at(0).E());
+    bJet2.SetPtEtaPhiE(Jet_vector.at(1).Pt(), Jet_vector.at(1).Eta(), Jet_vector.at(1).Phi(), Jet_vector.at(1).E());
+    if((bJet1+bJet2).M() > 50) h_InvariantMass_bb->Fill((bJet1+bJet2).M());
+  }
+ 
   if(ph1_p4.Pt() > 0.0){
        h_photon_pt_leading->Fill(ph1_p4.Pt());
        h_photon_eta_leading->Fill(ph1_p4.Eta());
@@ -435,6 +447,7 @@ int ReadHGGFiles_Delphes(std::string infile, std::string outfile, std::string ou
 
   h_PhotonPt_MET->Write();
   h_InvariantMass_PhPh->Write();
+  h_InvariantMass_bb->Write();
   tFile->Close();
   std::cout<<"Wrote output file "<<histfilename<<std::endl;
 

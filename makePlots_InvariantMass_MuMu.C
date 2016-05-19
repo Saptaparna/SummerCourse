@@ -41,8 +41,8 @@ void makePlots_InvariantMass_MuMu(){
   fSignal->SetParLimits(0, 5100.0, 15000.0);
   fSignal->SetParLimits(1, 80.0, 95.0);
   fSignal->SetParLimits(2, 0.0, 1.0);
-  h_InvMass->Draw("HIST");
   h_InvMass->Fit("fSignal", "", "", 70.0, 110.0);
+  h_InvMass->Draw("HIST");
   c1->SaveAs("h_InvariantMass_MuMu.pdf");
   c1->SaveAs("h_InvariantMass_MuMu.png");
 

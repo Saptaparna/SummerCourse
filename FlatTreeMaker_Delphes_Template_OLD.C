@@ -38,12 +38,7 @@ void FlatTreeMaker_Delphes::Begin(TTree * /*tree*/)
    outtree->Branch("jet_btag", &jet_btag); 
    outtree->Branch("MET", &MET, "MET/F");
    outtree->Branch("MET_Phi", &MET_Phi, "MET_Phi/F");
-   outtree->Branch("GenParticle_PDGId", &GenParticle_PDGId);
-   outtree->Branch("GenParticle_Pt", &GenParticle_Pt);
-   outtree->Branch("GenParticle_Phi", &GenParticle_Phi);
-   outtree->Branch("GenParticle_Eta", &GenParticle_Eta);
-   outtree->Branch("GenParticle_Mass", &GenParticle_Mass);
-   outtree->Branch("GenParticle_Energy", &GenParticle_Energy);
+
 }
 
 void FlatTreeMaker_Delphes::SlaveBegin(TTree * /*tree*/)
@@ -79,14 +74,7 @@ Bool_t FlatTreeMaker_Delphes::Process(Long64_t entry)
   nJets = -1;
   MET = 0;
   MET_Phi = -99.0;
-  GenParticle_PDGId.clear();
-  GenParticle_Pt.clear();
-  GenParticle_Phi.clear();
-  GenParticle_Eta.clear();
-  GenParticle_Mass.clear();
-  GenParticle_Energy.clear();
-  nGenParticles = -1;  
-
+  
   for (Int_t j=0;j<Jet_size;j++){
     
     jet_pt.push_back(Jet_PT[j]);
@@ -106,6 +94,7 @@ Bool_t FlatTreeMaker_Delphes::Process(Long64_t entry)
     el_charge.push_back(Electron_Charge[j]);
   }
 
+  cout << "Electron_size = " << Electron_size << endl;
   nElectrons = Electron_size;
 
   for (Int_t j=0;j<Muon_size;j++){
@@ -126,20 +115,8 @@ Bool_t FlatTreeMaker_Delphes::Process(Long64_t entry)
   }
 
   nPhotons = Photon_size;
-
-  for (Int_t j=0;j<Particle_size;j++){
-
-    GenParticle_PDGId.push_back(Particle_PID[j]);
-    GenParticle_Pt.push_back(Particle_PT[j]);
-    GenParticle_Phi.push_back(Particle_Phi[j]);
-    GenParticle_Eta.push_back(Particle_Eta[j]);
-    GenParticle_Mass.push_back(Particle_Mass[j]);
-    GenParticle_Energy.push_back(Particle_E[j]);
-
-  }
-
-  nGenParticles = Particle_size;
   
+
   MET = MissingET_MET[0];
   MET_Phi = MissingET_Phi[0];
 

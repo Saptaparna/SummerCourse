@@ -27,25 +27,25 @@ TLorentzVector fillTLorentzVector(double pT, double eta, double phi, double M)
 
 typedef struct
 {
-  double pT;
-  double eta;
-  double phi;
+  float pT;
+  float eta;
+  float phi;
   int charge;
 } LeptonInfo;
 
 typedef struct
 {
-  double pT;
-  double eta;
-  double phi;
+  float pT;
+  float eta;
+  float phi;
 } PhotonInfo;
 
 typedef struct
 {
-  double pT;
-  double eta;
-  double phi;
-  double mass;
+  float pT;
+  float eta;
+  float phi;
+  float mass;
   int btag;
 } JetInfo;
 
@@ -78,42 +78,42 @@ int ReadHGGFiles_Delphes(std::string infile, std::string outfile, std::string ou
 
   TFile *outputFile;
   TTree *outputTree;
-  double Mgg, Photon1_Pt, Photon2_Pt, Photon1_Eta, Photon2_Eta, Photon1_Phi, Photon2_Phi; 
+  float Mgg, Photon1_Pt, Photon2_Pt, Photon1_Eta, Photon2_Eta, Photon1_Phi, Photon2_Phi; 
 
   //output tree for Brian
   std::string outputtreename=(outTree+".root").c_str();
   outputFile = new TFile((outputtreename).c_str(),"RECREATE");
   outputTree=new TTree("HGG_Tree", "HGG_Tree");
-  outputTree->Branch("Mgg", &Mgg, "Mgg/D");
-  outputTree->Branch("Photon1_Pt", &Photon1_Pt, "Photon1_Pt/D");
-  outputTree->Branch("Photon2_Pt", &Photon2_Pt, "Photon2_Pt/D");
-  outputTree->Branch("Photon1_Eta", &Photon1_Eta, "Photon1_Eta/D");
-  outputTree->Branch("Photon2_Eta", &Photon2_Eta, "Photon2_Eta/D");
-  outputTree->Branch("Photon1_Phi", &Photon1_Phi, "Photon1_Phi/D");
-  outputTree->Branch("Photon2_Phi", &Photon2_Phi, "Photon2_Phi/D");
+  outputTree->Branch("Mgg", &Mgg, "Mgg/F");
+  outputTree->Branch("Photon1_Pt", &Photon1_Pt, "Photon1_Pt/F");
+  outputTree->Branch("Photon2_Pt", &Photon2_Pt, "Photon2_Pt/F");
+  outputTree->Branch("Photon1_Eta", &Photon1_Eta, "Photon1_Eta/F");
+  outputTree->Branch("Photon2_Eta", &Photon2_Eta, "Photon2_Eta/F");
+  outputTree->Branch("Photon1_Phi", &Photon1_Phi, "Photon1_Phi/F");
+  outputTree->Branch("Photon2_Phi", &Photon2_Phi, "Photon2_Phi/F");
 
-  std::vector<double>   *ph_pt;
-  std::vector<double>   *ph_phi;
-  vector<double>   *ph_eta;
+  std::vector<float>   *ph_pt;
+  std::vector<float>   *ph_phi;
+  vector<float>   *ph_eta;
   Int_t           nPhotons;
-  vector<double>   *el_pt;
-  vector<double>   *el_phi;
-  vector<double>   *el_eta;
+  vector<float>   *el_pt;
+  vector<float>   *el_phi;
+  vector<float>   *el_eta;
   vector<int>     *el_charge;
   Int_t           nElectrons;
-  vector<double>   *mu_pt;
-  vector<double>   *mu_phi;
-  vector<double>   *mu_eta;
+  vector<float>   *mu_pt;
+  vector<float>   *mu_phi;
+  vector<float>   *mu_eta;
   vector<int>     *mu_charge;
   Int_t           nMuons;
-  vector<double>   *jet_pt;
-  vector<double>   *jet_phi;
-  vector<double>   *jet_eta;
-  vector<double>   *jet_mass;
+  vector<float>   *jet_pt;
+  vector<float>   *jet_phi;
+  vector<float>   *jet_eta;
+  vector<float>   *jet_mass;
   vector<int>     *jet_btag;
   Int_t           nJets;
-  Double_t         MET;
-  Double_t         MET_Phi; 
+  Float_t         MET;
+  Float_t         MET_Phi; 
 
   ph_pt = 0;
   ph_phi = 0;
