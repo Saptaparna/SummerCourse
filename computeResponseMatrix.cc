@@ -245,9 +245,6 @@ int computeResponseMatrix(std::string infile, std::string outfile){
     }
   }
 
-  figureOfmerit = h_finalResponse->GetBinContent(2, 1)/(sqrt(h_finalResponse->GetBinContent(1, 1)*h_finalResponse->GetBinContent(2, 2)));
-  std::cout << "figureOfmerit = " << figureOfmerit << std::endl;
-
   TH2F *h_finalResponseBB=new TH2F("h_finalResponseBB", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", nBins, rebin_array, nBins, rebin_array); h_finalResponseBB->Sumw2();
   for(int k = 1; k<= h_responseBB->GetNbinsX(); k++) //reco information
   { 
