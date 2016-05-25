@@ -205,6 +205,7 @@ int computeResponseMatrix(std::string infile, std::string outfile){
         h_InvariantMass_MuMu->Fill(recoMass);
         h_InvariantMass_MuMuGen->Fill(genMass);
         h_response->Fill(recoMass, genMass);
+        //if(genMass>90 and genMass<100) std::cout<< "recoMass = " << recoMass << std::endl;
         h_responseBB->Fill(recoMass, genMass);
       }
     }
@@ -212,7 +213,6 @@ int computeResponseMatrix(std::string infile, std::string outfile){
   }//event loop closed
 
   TH2F *h_finalResponse=new TH2F("h_finalResponse", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", 10, 50.0, 150.0, 10, 50.0, 150.0); h_finalResponse->Sumw2();
-  //TH2F *h_finalResponse=new TH2F("h_finalResponse", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", 10, 50.0, 150.0, 10, 50.0, 150.0); h_finalResponse->Sumw2(); 
   for(int k = 1; k<= h_response->GetNbinsX(); k++) //reco information
   { 
     double sumY = 0;
@@ -230,7 +230,7 @@ int computeResponseMatrix(std::string infile, std::string outfile){
   }
 
   //compute figure of merit
-  double figureOfmerit = 0.0;
+  /*double figureOfmerit = 0.0;
   for(int k = 1; k<= h_finalResponse->GetNbinsX(); k++) //reco information
   {
     for(int l = 1; l<= h_finalResponse->GetNbinsY(); l++)  
@@ -243,7 +243,33 @@ int computeResponseMatrix(std::string infile, std::string outfile){
 
       }
     }
+  }*/
+
+  double figureOfmerit = 1.0;
+  for(int i = 1; i<= h_finalResponse->GetNbinsX(); i++) //without nested loop
+  {
+    double diagonal = h_finalResponse->GetBinContent(i, i);
+    double diagonal_l = h_finalResponse->GetBinContent(i-1, i);
+    double diagonal_u = h_finalResponse->GetBinContent(i, i+1);
+     
+    double lowerDiagonal = h_finalResponse->GetBinContent(i, i-1);
+    double lowerDiagonal_u = diagonal;
+    double lowerDiagonal_l = h_finalResponse->GetBinContent(i-1, i-1);
+
+    if(diagonal > 0.0 and diagonal_l > 0.0 and diagonal_u > 0.0)
+    {
+      std::cout << "figureOfmerit " << i << " = " << diagonal/(sqrt(diagonal_l*diagonal_u)) << std::endl;
+      figureOfmerit *= diagonal/(sqrt(diagonal_l*diagonal_u));
+    } 
+    if(lowerDiagonal > 0.0 and lowerDiagonal_l > 0.0 and lowerDiagonal_u > 0.0)
+    {
+      std::cout << "lower diagonal figureOfmerit " << i << " = " << lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l)) << std::endl;
+      double figureOfmerit_lower = lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l));
+      figureOfmerit *= figureOfmerit_lower;
+    }
   }
+
+  std::cout << "figureOfmerit = " << figureOfmerit << std::endl;
 
   TH2F *h_finalResponseBB=new TH2F("h_finalResponseBB", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", nBins, rebin_array, nBins, rebin_array); h_finalResponseBB->Sumw2();
   for(int k = 1; k<= h_responseBB->GetNbinsX(); k++) //reco information
