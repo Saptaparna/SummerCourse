@@ -43,7 +43,6 @@ typedef struct
   double pT;
   double eta;
   double phi;
-  int charge;
 } LeptonInfo;
 
 
@@ -52,94 +51,28 @@ bool sortLeptonsInDescendingpT(LeptonInfo lep1, LeptonInfo lep2)
   return (lep1.pT > lep2.pT);
 }
 
-int computeResponseMatrix(std::string infile, std::string outfile){
+int computeResponseMatrix_BBFile(std::string infile, std::string outfile){
 
   std::string inputfilename=(infile+".root").c_str();
   TChain *tree=new TChain("LowPtSUSY_Tree");
   tree->Add(inputfilename.c_str());
   std::cout<<"Opened input file "<<inputfilename<<std::endl;
 
-  std::vector<double>   *ph_pt;
-  std::vector<double>   *ph_phi;
-  vector<double>   *ph_eta;
-  Int_t           nPhotons;
-  vector<double>   *el_pt;
-  vector<double>   *el_phi;
-  vector<double>   *el_eta;
-  vector<int>     *el_charge;
-  Int_t           nElectrons;
-  vector<double>   *mu_pt;
-  vector<double>   *mu_phi;
-  vector<double>   *mu_eta;
-  vector<int>     *mu_charge;
-  Int_t           nMuons;
-  vector<double>   *jet_pt;
-  vector<double>   *jet_phi;
-  vector<double>   *jet_eta;
-  vector<double>   *jet_mass;
-  vector<int>     *jet_btag;
-  Int_t           nJets;
-  Float_t         MET;
-  Float_t         MET_Phi;
-  vector<double>   *GenParticle_PDGId;
-  vector<double>   *GenParticle_Pt;
-  vector<double>   *GenParticle_Phi;
-  vector<double>   *GenParticle_Eta;
-  vector<double>   *GenParticle_Mass;
-  vector<double>   *GenParticle_Energy;
-  Int_t            nGenParticles;
+  Double_t        Mll;
+  Double_t        Muon1_Pt;
+  Double_t        Muon2_Pt;
+  Double_t        Muon1_Eta;
+  Double_t        Muon2_Eta;
+  Double_t        Muon1_Phi;
+  Double_t        Muon2_Phi;
 
-  ph_pt = 0;
-  ph_phi = 0;
-  ph_eta = 0;
-  el_pt = 0;
-  el_phi = 0;
-  el_eta = 0;
-  el_charge = 0;
-  mu_pt = 0;
-  mu_phi = 0;
-  mu_eta = 0;
-  mu_charge = 0;
-  jet_pt = 0;
-  jet_phi = 0;
-  jet_eta = 0;
-  jet_mass = 0;
-  jet_btag = 0;
-  GenParticle_PDGId = 0;
-  GenParticle_Pt = 0;
-  GenParticle_Phi = 0;
-  GenParticle_Eta = 0;
-  GenParticle_Mass = 0;
-  GenParticle_Energy = 0;
-
-  tree->SetBranchAddress("ph_pt", &(ph_pt));
-  tree->SetBranchAddress("ph_phi", &(ph_phi));
-  tree->SetBranchAddress("ph_eta", &(ph_eta));
-  tree->SetBranchAddress("nPhotons", &(nPhotons));
-  tree->SetBranchAddress("el_pt", &(el_pt));
-  tree->SetBranchAddress("el_eta", &(el_eta));
-  tree->SetBranchAddress("el_phi", &(el_phi));
-  tree->SetBranchAddress("el_charge", &(el_charge));
-  tree->SetBranchAddress("nElectrons", &(nElectrons));
-  tree->SetBranchAddress("mu_pt", &(mu_pt));
-  tree->SetBranchAddress("mu_eta", &(mu_eta));
-  tree->SetBranchAddress("mu_phi", &(mu_phi));
-  tree->SetBranchAddress("mu_charge", &(mu_charge));
-  tree->SetBranchAddress("nMuons", &(nMuons));
-  tree->SetBranchAddress("jet_pt", &(jet_pt));
-  tree->SetBranchAddress("jet_phi", &(jet_phi));
-  tree->SetBranchAddress("jet_eta", &(jet_eta));
-  tree->SetBranchAddress("jet_mass", &(jet_mass));
-  tree->SetBranchAddress("jet_btag", &(jet_btag));
-  tree->SetBranchAddress("nJets", &(nJets));
-  tree->SetBranchAddress("MET", &(MET));
-  tree->SetBranchAddress("MET_Phi", &(MET_Phi));
-  tree->SetBranchAddress("GenParticle_PDGId", &(GenParticle_PDGId));
-  tree->SetBranchAddress("GenParticle_Pt", &(GenParticle_Pt));
-  tree->SetBranchAddress("GenParticle_Phi", &(GenParticle_Phi));
-  tree->SetBranchAddress("GenParticle_Eta", &(GenParticle_Eta));
-  tree->SetBranchAddress("GenParticle_Mass", &(GenParticle_Mass));
-  tree->SetBranchAddress("GenParticle_Energy", &(GenParticle_Energy));
+  tree->SetBranchAddress("Mll", &(Mll));
+  tree->SetBranchAddress("Muon1_Pt", &(Muon1_Pt));
+  tree->SetBranchAddress("Muon2_Pt", &(Muon2_Pt));
+  tree->SetBranchAddress("Muon1_Eta", &(Muon1_Eta));
+  tree->SetBranchAddress("Muon2_Eta", &(Muon2_Eta));
+  tree->SetBranchAddress("Muon1_Phi", &(Muon1_Phi));
+  tree->SetBranchAddress("Muon2_Phi", &(Muon2_Phi));
 
   TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 20,  50.0, 150.0, 20, 50.0, 150.0); h_response->Sumw2();
   //TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 10, 50.0, 150.0, 10, 50.0, 150.0); h_response->Sumw2();
@@ -161,10 +94,10 @@ int computeResponseMatrix(std::string infile, std::string outfile){
   {
      tree->GetEvent(i);
      std::vector<LeptonInfo> muons;
-     for (unsigned int j=0; j<mu_pt->size(); ++j)
+     for (unsigned int j=0; j<2; ++j) //only 2 muons saved
      {
        LeptonInfo muon;
-       muon.pT=mu_pt->at(j);
+       muon.pT=Muon1_Pt;
        muon.eta=mu_eta->at(j);
        muon.phi=mu_phi->at(j);
        muon.charge=mu_charge->at(j);
@@ -199,8 +132,6 @@ int computeResponseMatrix(std::string infile, std::string outfile){
       if(mu2_p4.Pt()>20.0) 
       {
         double genMass = genParticles.at(0).mass;
-        double genPt1 = genParticles.at(0).pT;
-        if(genParticles.size() >= 1) double genPt2 = genParticles.at(1).pT;
         double recoMass = (mu1_p4+mu2_p4).M();
         h_InvariantMass_MuMu->Fill(recoMass);
         h_InvariantMass_MuMuGen->Fill(genMass);

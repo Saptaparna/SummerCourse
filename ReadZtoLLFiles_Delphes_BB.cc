@@ -59,7 +59,7 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
 
   TFile *outputFile;
   TTree *outputTree;
-  double Mll, Muon1_Pt, Muon2_Pt, Muon1_Eta, Muon2_Eta, Muon1_Phi, Muon2_Phi;
+  double Mll, Muon1_Pt, Muon2_Pt, Muon1_Eta, Muon2_Eta, Muon1_Phi, Muon2_Phi, Mll_gen, genMuon1_Pt, genMuon2_Pt, genMuon1_Eta, genMuon2_Eta, genMuon1_Phi, genMuon2_Phi;
 
   //output tree for Brian
   std::string outputtreename=(outTree+".root").c_str();
@@ -72,6 +72,13 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
   outputTree->Branch("Muon2_Eta", &Muon2_Eta, "Muon2_Eta/D");
   outputTree->Branch("Muon1_Phi", &Muon1_Phi, "Muon1_Phi/D");
   outputTree->Branch("Muon2_Phi", &Muon2_Phi, "Muon2_Phi/D");
+  outputTree->Branch("genMuon1_Pt", &genMuon1_Pt, "genMuon1_Pt/D");
+  outputTree->Branch("genMuon2_Pt", &genMuon2_Pt, "genMuon2_Pt/D");
+  outputTree->Branch("genMuon1_Eta", &genMuon1_Eta, "genMuon1_Eta/D");
+  outputTree->Branch("genMuon2_Eta", &genMuon2_Eta, "genMuon2_Eta/D");
+  outputTree->Branch("genMuon1_Phi", &genMuon1_Phi, "genMuon1_Phi/D");
+  outputTree->Branch("genMuon2_Phi", &genMuon2_Phi, "genMuon2_Phi/D");
+  outputTree->Branch("Mll_gen", &Mll_gen, "Mll_gen/D");
 
   std::vector<double>   *ph_pt;
   std::vector<double>   *ph_phi;
@@ -95,14 +102,14 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
   Int_t           nJets;
   Float_t         MET;
   Float_t         MET_Phi; 
-  /*vector<double>   *GenParticle_PDGId;
+  vector<double>   *GenParticle_PDGId;
   vector<double>   *GenParticle_Pt;
   vector<double>   *GenParticle_Phi;
   vector<double>   *GenParticle_Eta;
   vector<double>   *GenParticle_Mass;
   vector<double>   *GenParticle_Energy;
   Int_t            nGenParticles;
-  */
+  
   ph_pt = 0;
   ph_phi = 0;
   ph_eta = 0;
@@ -119,13 +126,13 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
   jet_eta = 0;
   jet_mass = 0;
   jet_btag = 0;
-  /*GenParticle_PDGId = 0;
+  GenParticle_PDGId = 0;
   GenParticle_Pt = 0;
   GenParticle_Phi = 0;
   GenParticle_Eta = 0;
   GenParticle_Mass = 0;
   GenParticle_Energy = 0;
-*/
+
   tree->SetBranchAddress("ph_pt", &(ph_pt));
   tree->SetBranchAddress("ph_phi", &(ph_phi));
   tree->SetBranchAddress("ph_eta", &(ph_eta));
@@ -148,13 +155,13 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
   tree->SetBranchAddress("nJets", &(nJets));
   tree->SetBranchAddress("MET", &(MET));
   tree->SetBranchAddress("MET_Phi", &(MET_Phi));
-  /*tree->SetBranchAddress("GenParticle_PDGId", &(GenParticle_PDGId));
+  tree->SetBranchAddress("GenParticle_PDGId", &(GenParticle_PDGId));
   tree->SetBranchAddress("GenParticle_Pt", &(GenParticle_Pt));
   tree->SetBranchAddress("GenParticle_Phi", &(GenParticle_Phi));
   tree->SetBranchAddress("GenParticle_Eta", &(GenParticle_Eta));
   tree->SetBranchAddress("GenParticle_Mass", &(GenParticle_Mass));
   tree->SetBranchAddress("GenParticle_Energy", &(GenParticle_Energy));
-*/
+
   TH1F *h_mu_pt_leading_MuMu=new TH1F("h_mu_pt_leading_MuMu", "Leading muon pT; pT [GeV]; Events/GeV", 1000, 0, 1000); h_mu_pt_leading_MuMu->Sumw2();
   TH1F *h_mu_pt_trailing_MuMu=new TH1F("h_mu_pt_trailing_MuMu", "Trailing muon pT; pT [GeV]; Events/GeV", 1000, 0, 1000); h_mu_pt_trailing_MuMu->Sumw2();
   TH1F *h_mu_eta_leading_MuMu=new TH1F("h_mu_eta_leading_MuMu", "Leading muon #eta ; #eta ; Events", 600, -3.0, 3.0); h_mu_eta_leading_MuMu->Sumw2();
@@ -182,7 +189,13 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
      Muon2_Eta = 0.0;
      Muon1_Phi = 0.0;
      Muon2_Phi = 0.0;
- 
+     genMuon1_Pt = 0.0;
+     genMuon2_Pt = 0.0;
+     genMuon1_Eta = 0.0;
+     genMuon2_Eta = 0.0;
+     genMuon1_Phi = 0.0;
+     genMuon2_Phi = 0.0;
+
     // filling the muon's properties into a vector of struct
     std::vector<LeptonInfo> muons;
     for (unsigned int j=0; j<mu_pt->size(); ++j)
@@ -194,7 +207,7 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
        muon.charge=mu_charge->at(j);
        muons.push_back(muon);
     }
-/*
+
     std::vector<GenParticleInfo> genParticles;
     std::vector<GenParticleInfo> genParticlesLep;
     for (unsigned int j=0; j<GenParticle_PDGId->size(); j++)
@@ -206,8 +219,6 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
        genParticle.mass = GenParticle_Mass->at(j);
        genParticle.energy = GenParticle_Energy->at(j);
        genParticle.pdgID = GenParticle_PDGId->at(j); 
-       //cout << "GenParticle_PDGId->at(j) = " << GenParticle_PDGId->at(j) << endl;
-       //cout << "genParticle.pdgID = " << genParticle.pdgID << endl;
        if(genParticle.pdgID==23) genParticles.push_back(genParticle);
        if(abs(genParticle.pdgID)==13) genParticlesLep.push_back(genParticle);
     }
@@ -216,7 +227,9 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
     //cout << "genParticles.size() = " << genParticles.size() << endl;
     //if(genParticles.size() > 0) std::cout << "genParticles.at(0).pdgID = " << genParticles.at(0).pdgID << std::endl;
     //if(genParticles.size() > 0 and genParticles.at(0).pdgID==23) std::cout << "genParticles.at(0).mass true Z mass = " << genParticles.at(0).mass << std::endl;
-    if(genParticlesLep.size() > 1) {
+/*
+    if(genParticlesLep.size() > 1) 
+    {
       TLorentzVector mu1Gen_p4;
       TLorentzVector mu2Gen_p4;
       mu1Gen_p4 = fillTLorentzVector(0.0, 0.0, 0.0, 0.0);
@@ -236,7 +249,7 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
     if (muons.size() > 0) mu1_p4=fillTLorentzVector(muons.at(0).pT, muons.at(0).eta, muons.at(0).phi, 0.0);
     if (muons.size() > 1) mu2_p4=fillTLorentzVector(muons.at(1).pT, muons.at(1).eta, muons.at(1).phi, 0.0);
 
-    //if(genParticles.size() <=  0) continue;
+    if(genParticles.size() <=  0) continue;
 
     if(mu1_p4.Pt()>20.0){
       if(mu2_p4.Pt()>20.0) {
@@ -247,15 +260,25 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
         h_mu_eta_trailing_MuMu->Fill(mu2_p4.Eta());
         h_mu_pt_trailing_MuMu->Fill(mu2_p4.Pt());
         h_InvariantMass_MuMu->Fill((mu1_p4+mu2_p4).M());
-        //h_InvariantMass_MuMuGen->Fill(genParticles.at(0).mass);
+        h_InvariantMass_MuMuGen->Fill(genParticles.at(0).mass);
+        if(genParticlesLep.size()>1) 
+        {
+          genMuon1_Pt = genParticlesLep.at(0).pT;
+          genMuon2_Pt = genParticlesLep.at(1).pT;
+          genMuon1_Phi = genParticlesLep.at(0).phi;
+          genMuon2_Phi = genParticlesLep.at(1).phi;
+          genMuon1_Eta = genParticlesLep.at(0).eta;
+          genMuon2_Eta = genParticlesLep.at(1).eta;
+        }
         Muon1_Pt = mu1_p4.Pt();
         Muon2_Pt = mu2_p4.Pt();
         Muon1_Eta = mu1_p4.Eta();
         Muon2_Eta = mu2_p4.Eta();
         Muon1_Phi = mu1_p4.Phi();
         Muon2_Phi = mu2_p4.Phi();
+        Mll_gen = genParticles.at(0).mass;
         Mll = (mu1_p4+mu2_p4).M();
-        if(Mll > 1000)
+        /*if(Mll > 1000)
         {
           std::cout << "Muon1_Pt = " << Muon1_Pt << std::endl;
           std::cout << "Muon2_Pt = " << Muon2_Pt << std::endl;
@@ -269,7 +292,7 @@ int ReadPPZFiles_Delphes_BB(std::string infile, std::string outfile, std::string
             nDup++;
             //break;
           }
-        }
+        }*/
         //if (bDuplicate) continue;
         //else checkDuplicates.push_back(dupCheck);
        }//trailing muon "if"

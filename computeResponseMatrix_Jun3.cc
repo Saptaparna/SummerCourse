@@ -52,7 +52,7 @@ bool sortLeptonsInDescendingpT(LeptonInfo lep1, LeptonInfo lep2)
   return (lep1.pT > lep2.pT);
 }
 
-int computeResponseMatrix(std::string infile, std::string outfile){
+int computeResponseMatrix_Jun3(std::string infile, std::string outfile){
 
   std::string inputfilename=(infile+".root").c_str();
   TChain *tree=new TChain("LowPtSUSY_Tree");
@@ -141,8 +141,8 @@ int computeResponseMatrix(std::string infile, std::string outfile){
   tree->SetBranchAddress("GenParticle_Mass", &(GenParticle_Mass));
   tree->SetBranchAddress("GenParticle_Energy", &(GenParticle_Energy));
 
-  TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 20,  50.0, 150.0, 20, 50.0, 150.0); h_response->Sumw2();
-  //TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 10, 50.0, 150.0, 10, 50.0, 150.0); h_response->Sumw2();
+  //TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 20,  50.0, 150.0, 20, 50.0, 150.0); h_response->Sumw2();
+  TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 4, 50.0, 150.0, 4, 50.0, 150.0); h_response->Sumw2();
   TH1F *h_InvariantMass_MuMu=new TH1F("h_InvariantMass_MuMu", "Di-muon invariant mass; m_{#mu#mu} [GeV]; Events/GeV", 9000, 0, 300); h_InvariantMass_MuMu->Sumw2();
   TH1F *h_InvariantMass_MuMuGen = new TH1F("h_InvariantMass_MuMuGen", "Z generator particle mass; m_{Z} [GeV]; Events/GeV ", 9000, 0, 300); h_InvariantMass_MuMuGen->Sumw2();
 
@@ -155,11 +155,15 @@ int computeResponseMatrix(std::string infile, std::string outfile){
 
   int nEvents=tree->GetEntries();
   //int nEvents=200000;
+  //int nEvents=20;
+  int counter = 0;
   std::cout << "nEvents= " << nEvents << std::endl;
 
   for (int i=0; i<nEvents ; ++i)
   {
      tree->GetEvent(i);
+     counter++; //add cuts here to synchronize with Brian
+
      std::vector<LeptonInfo> muons;
      for (unsigned int j=0; j<mu_pt->size(); ++j)
      {
@@ -199,20 +203,17 @@ int computeResponseMatrix(std::string infile, std::string outfile){
       if(mu2_p4.Pt()>20.0) 
       {
         double genMass = genParticles.at(0).mass;
-        double genPt1 = genParticles.at(0).pT;
-        if(genParticles.size() >= 1) double genPt2 = genParticles.at(1).pT;
         double recoMass = (mu1_p4+mu2_p4).M();
         h_InvariantMass_MuMu->Fill(recoMass);
         h_InvariantMass_MuMuGen->Fill(genMass);
         h_response->Fill(recoMass, genMass);
-        //if(genMass>90 and genMass<100) std::cout<< "recoMass = " << recoMass << std::endl;
         h_responseBB->Fill(recoMass, genMass);
       }
     }
 
   }//event loop closed
 
-  TH2F *h_finalResponse=new TH2F("h_finalResponse", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", 20, 50.0, 150.0, 20, 50.0, 150.0); h_finalResponse->Sumw2();
+  TH2F *h_finalResponse=new TH2F("h_finalResponse", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", 4, 50.0, 150.0, 4, 50.0, 150.0); h_finalResponse->Sumw2();
   for(int k = 1; k<= h_response->GetNbinsX(); k++) //reco information
   { 
     double sumY = 0;
@@ -225,12 +226,13 @@ int computeResponseMatrix(std::string infile, std::string outfile){
     {
       if(sumY>0) h_finalResponse->SetBinContent(k, l, (h_response->GetBinContent(k, l)/sumY));
       else h_finalResponse->SetBinContent(k, l, 0);
+      double fsrBinLow = h_response->GetYaxis()->FindBin(90); 
       //std::cout << "h_finalResponse->GetBinContent(k, l) = " << h_finalResponse->GetBinContent(k, l) << std::endl;
     }
   }
 
-  //double figureOfmerit = 1.0;
-  double figureOfmerit = 0.0;
+  double figureOfmerit = 1.0;
+  //double figureOfmerit = 0.0;
   for(int i = 1; i<= h_finalResponse->GetNbinsX(); i++) //without nested loop
   {
     double offDiagonal = h_finalResponse->GetBinContent(i, i+1);
@@ -245,19 +247,20 @@ int computeResponseMatrix(std::string infile, std::string outfile){
 
     if(offDiagonal > 0.0 and diagonal_d > 0.0 and diagonal_r > 0.0)
     {
-      figureOfmerit += offDiagonal/(sqrt(diagonal_d*diagonal_r)); 
-      std::cout << "offDiagonal/(sqrt(diagonal_d*diagonal_r)) = " << offDiagonal/(sqrt(diagonal_d*diagonal_r)) << std::endl;
+      figureOfmerit *= offDiagonal/(sqrt(diagonal_d*diagonal_r)); 
+      //std::cout << "figureOfmerit = " << figureOfmerit << std::endl;
     } 
     if(lowerDiagonal > 0.0 and lowerDiagonal_l > 0.0 and lowerDiagonal_u > 0.0)
     {
       double figureOfmerit_lower = lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l));
-      figureOfmerit += figureOfmerit_lower;
-      //std::cout << "lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l)) = " << lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l)) << std::endl;
+      figureOfmerit *= figureOfmerit_lower;
+      //std::cout << "figureOfmerit_lower = " << figureOfmerit_lower << std::endl;
     }
+    //std::cout << "figureOfmerit 1 = " << figureOfmerit << std::endl;
   }
 
-  std::cout << "figureOfmerit standard GeV binning = " << figureOfmerit/(h_finalResponse->GetNbinsX()) << std::endl;
-  //std::cout << "figureOfmerit standard GeV binning = " << figureOfmerit << std::endl;
+  //std::cout << "figureOfmerit standard GeV binning = " << figureOfmerit/(h_finalResponse->GetNbinsX()) << std::endl;
+  std::cout << "figureOfmerit standard GeV binning = " << figureOfmerit << std::endl;
 
   TH2F *h_finalResponseBB=new TH2F("h_finalResponseBB", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", nBins, rebin_array, nBins, rebin_array); h_finalResponseBB->Sumw2();
   for(int k = 1; k<= h_responseBB->GetNbinsX(); k++) //reco information
@@ -275,8 +278,8 @@ int computeResponseMatrix(std::string infile, std::string outfile){
     }
   }
 
-  //double figureOfmeritBB = 1.0;
-  double figureOfmeritBB = 0.0;
+  double figureOfmeritBB = 1.0;
+  //double figureOfmeritBB = 0.0;
   for(int i = 1; i<= h_finalResponseBB->GetNbinsX(); i++) //without nested loop
   {
     double offDiagonal = h_finalResponseBB->GetBinContent(i, i+1);
@@ -289,19 +292,19 @@ int computeResponseMatrix(std::string infile, std::string outfile){
 
     if(offDiagonal > 0.0 and diagonal_d > 0.0 and diagonal_r > 0.0)
     {
-      figureOfmeritBB += offDiagonal/(sqrt(diagonal_d*diagonal_r));
+      figureOfmeritBB *= offDiagonal/(sqrt(diagonal_d*diagonal_r));
     }
     if(lowerDiagonal > 0.0 and lowerDiagonal_l > 0.0 and lowerDiagonal_u > 0.0)
     {
       double figureOfmerit_lower = lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l));
-      figureOfmeritBB += figureOfmerit_lower;
+      figureOfmeritBB *= figureOfmerit_lower;
     }
     //if(offDiagonal == 0.0 or diagonal_d == 0.0 or diagonal_r == 0.0 or lowerDiagonal == 0.0 or lowerDiagonal_l == 0.0 or lowerDiagonal_u == 0.0) std::cout << "Some empty cells found" << std::endl;
-
+    //std::cout << "figureOfmerit 2 = " << figureOfmeritBB << std::endl;    
   }
 
-  std::cout << "figureOfmerit Bayesian Blocks binning = " << figureOfmeritBB/(h_finalResponseBB->GetNbinsX()) << std::endl;
-  //std::cout << "figureOfmerit Bayesian Blocks binning = " << figureOfmeritBB << std::endl;
+  //std::cout << "figureOfmerit Bayesian Blocks binning = " << figureOfmeritBB/(h_finalResponseBB->GetNbinsX()) << std::endl;
+  std::cout << "figureOfmerit Bayesian Blocks binning = " << figureOfmeritBB << std::endl;
 
   std::string histfilename=(outfile+".root").c_str();
   TFile *tFile=new TFile(histfilename.c_str(), "RECREATE");
@@ -362,4 +365,29 @@ int computeRelevantArea(std::string infile)
 
   return 0;
 
-} 
+}
+
+int computeAreaForMichael()
+{
+  Float_t rebin_array[] = {50.0437002 ,   53.88551609,   60.76757885,   66.05113402, 69.82073386,   72.30532915,   75.81628342,   78.63675151, 80.47660605,   81.69053905,   82.32946915,   83.36438819, 84.26875909,   84.99499012,   85.51975447,   86.41110934, 86.99699361,   87.63302003,   88.29013696,   88.79892309, 89.5140167 ,   90.13442635,   92.01304163,   92.62524283, 93.04615559,   93.5202137 ,   94.02254874,   94.75193932, 95.29608935,   96.00046705,   96.56100526,   97.39413587, 98.58067156,  100.16170276,  102.20873394,  105.07039449, 107.40429574,  112.31184178,  121.2490133 ,  134.39090819, 149.84399272};
+
+  Int_t  nBins = sizeof(rebin_array)/sizeof(Float_t) - 1;
+
+  double length = 1.0;
+  for(int i=0; i<nBins; i++)
+  {
+    double difference = rebin_array[i+1]-rebin_array[i];
+    length *= difference; 
+  }
+
+  double area10GeV = (double)10*10*10/(double)(150-50)*(150-50);
+  double area5GeV = (double)5*5*20/(double)((150-50)*(150-50));
+  double areaBB = length*length*nBins/((150-50)*(150-50));
+
+  std::cout << "area10GeV = " << 1.0/area10GeV << std::endl;
+  std::cout << "area5GeV = " << 1.0/area5GeV << std::endl;
+  std::cout << "areaBB = " << 1.0/areaBB << std::endl;
+
+  return 0;
+}
+ 
