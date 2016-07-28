@@ -141,8 +141,8 @@ int computeResponseMatrix(std::string infile, std::string outfile){
   tree->SetBranchAddress("GenParticle_Mass", &(GenParticle_Mass));
   tree->SetBranchAddress("GenParticle_Energy", &(GenParticle_Energy));
 
-  TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 20,  50.0, 150.0, 20, 50.0, 150.0); h_response->Sumw2();
-  //TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 10, 50.0, 150.0, 10, 50.0, 150.0); h_response->Sumw2();
+  //TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 20,  50.0, 150.0, 20, 50.0, 150.0); h_response->Sumw2();
+  TH2F *h_response=new TH2F("h_response", "Response Matrix; Reconstructed Mass [GeV]; Generated Mass [GeV]", 10, 50.0, 150.0, 10, 50.0, 150.0); h_response->Sumw2();
   TH1F *h_InvariantMass_MuMu=new TH1F("h_InvariantMass_MuMu", "Di-muon invariant mass; m_{#mu#mu} [GeV]; Events/GeV", 9000, 0, 300); h_InvariantMass_MuMu->Sumw2();
   TH1F *h_InvariantMass_MuMuGen = new TH1F("h_InvariantMass_MuMuGen", "Z generator particle mass; m_{Z} [GeV]; Events/GeV ", 9000, 0, 300); h_InvariantMass_MuMuGen->Sumw2();
 
@@ -212,7 +212,7 @@ int computeResponseMatrix(std::string infile, std::string outfile){
 
   }//event loop closed
 
-  TH2F *h_finalResponse=new TH2F("h_finalResponse", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", 20, 50.0, 150.0, 20, 50.0, 150.0); h_finalResponse->Sumw2();
+  TH2F *h_finalResponse=new TH2F("h_finalResponse", "Response Matrix; Reconstructed Mass [GeV]; Generator Mass [GeV]", 10, 50.0, 150.0, 10, 50.0, 150.0); h_finalResponse->Sumw2();
   for(int k = 1; k<= h_response->GetNbinsX(); k++) //reco information
   { 
     double sumY = 0;
@@ -246,12 +246,14 @@ int computeResponseMatrix(std::string infile, std::string outfile){
     if(offDiagonal > 0.0 and diagonal_d > 0.0 and diagonal_r > 0.0)
     {
       figureOfmerit += offDiagonal/(sqrt(diagonal_d*diagonal_r)); 
-      std::cout << "offDiagonal/(sqrt(diagonal_d*diagonal_r)) = " << offDiagonal/(sqrt(diagonal_d*diagonal_r)) << std::endl;
+      //std::cout << "offDiagonal/(sqrt(diagonal_d*diagonal_r)) = " << offDiagonal/(sqrt(diagonal_d*diagonal_r)) << std::endl;
+      std::cout << "offDiagonal = " << offDiagonal << " diagonal_d = " << diagonal_d << " diagonal_r = " << diagonal_r  << std::endl;
     } 
     if(lowerDiagonal > 0.0 and lowerDiagonal_l > 0.0 and lowerDiagonal_u > 0.0)
     {
       double figureOfmerit_lower = lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l));
       figureOfmerit += figureOfmerit_lower;
+      std::cout << "lowerDiagonal = " << lowerDiagonal << " diagonal_u = " << lowerDiagonal_u << " diagonal_l = " << lowerDiagonal_l  << std::endl;
       //std::cout << "lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l)) = " << lowerDiagonal/(sqrt(lowerDiagonal_u*lowerDiagonal_l)) << std::endl;
     }
   }

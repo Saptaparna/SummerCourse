@@ -18,7 +18,7 @@
 
 using namespace std;
 
-TLorentzVector fillTLorentzVector(double pT, double eta, double phi, double M)
+TLorentzVector fillTLorentzVector(float pT, float eta, float phi, float M)
 {
   TLorentzVector object_p4;
   object_p4.SetPtEtaPhiM(pT, eta, phi, M);
@@ -426,8 +426,8 @@ int ReadSignalFiles_Delphes(std::string infile, std::string outfile, std::string
    // Now sorting this vector of structs
    std::sort (jets.begin(), jets.end(), sortJetsInDescendingpT);   
    
-   double HT = 0.0; //jets are sorted. Don't care as far as HT is concerned.
-   double HTb = 0.0; 
+   float HT = 0.0; //jets are sorted. Don't care as far as HT is concerned.
+   float HTb = 0.0; 
    vector<TLorentzVector> Jet_vector;
    Jet_vector.clear();
    vector<TLorentzVector> bJet_vector;
@@ -447,7 +447,7 @@ int ReadSignalFiles_Delphes(std::string infile, std::string outfile, std::string
         TLorentzVector Electron;
         Electron.SetPtEtaPhiM(0.0, 0.0, 0.0, 0.0);
         Electron.SetPtEtaPhiM(electrons.at(j).pT, electrons.at(j).eta, electrons.at(j).phi, 0.0);
-        double DRjet_el = Jet.DeltaR(Electron);
+        float DRjet_el = Jet.DeltaR(Electron);
         if(DRjet_el<0.5) isGoodJet=false;
       }
 
@@ -456,7 +456,7 @@ int ReadSignalFiles_Delphes(std::string infile, std::string outfile, std::string
          TLorentzVector Muon;
          Muon.SetPtEtaPhiM(0.0, 0.0, 0.0, 0.0);
          Muon.SetPtEtaPhiM(muons.at(j).pT, muons.at(j).eta, muons.at(j).phi, 0.0);
-         double DRjet_mu = Jet.DeltaR(Muon);
+         float DRjet_mu = Jet.DeltaR(Muon);
          if(DRjet_mu<0.5) isGoodJet=false;
       }  
        for(unsigned int l=0; l<photons.size(); ++l)
@@ -464,7 +464,7 @@ int ReadSignalFiles_Delphes(std::string infile, std::string outfile, std::string
         TLorentzVector Photon;
         Photon.SetPtEtaPhiM(0.0, 0.0, 0.0, 0.0);
         Photon.SetPtEtaPhiM(photons.at(l).pT, photons.at(l).eta, photons.at(l).phi, 0.0);
-        double DRjet_ph = Jet.DeltaR(Photon);
+        float DRjet_ph = Jet.DeltaR(Photon);
         if(DRjet_ph<0.5) isGoodJet=false;
         }
       if(isGoodJet) Jet_vector.push_back(Jet); 
@@ -479,7 +479,7 @@ int ReadSignalFiles_Delphes(std::string infile, std::string outfile, std::string
         TLorentzVector Electron;
         Electron.SetPtEtaPhiM(0.0, 0.0, 0.0, 0.0);
         Electron.SetPtEtaPhiM(electrons.at(j).pT, electrons.at(j).eta, electrons.at(j).phi, 0.0);
-        double DRjet_el = bJet.DeltaR(Electron);
+        float DRjet_el = bJet.DeltaR(Electron);
         if(DRjet_el<0.5) isGoodbJet=false;
       }
 
@@ -488,7 +488,7 @@ int ReadSignalFiles_Delphes(std::string infile, std::string outfile, std::string
          TLorentzVector Muon;
          Muon.SetPtEtaPhiM(0.0, 0.0, 0.0, 0.0);
          Muon.SetPtEtaPhiM(muons.at(j).pT, muons.at(j).eta, muons.at(j).phi, 0.0);
-         double DRjet_mu = bJet.DeltaR(Muon);
+         float DRjet_mu = bJet.DeltaR(Muon);
          if(DRjet_mu<0.5) isGoodbJet=false;
       } 
        for(unsigned int l=0; l<photons.size(); ++l)
@@ -496,7 +496,7 @@ int ReadSignalFiles_Delphes(std::string infile, std::string outfile, std::string
         TLorentzVector Photon;
         Photon.SetPtEtaPhiM(0.0, 0.0, 0.0, 0.0);
         Photon.SetPtEtaPhiM(photons.at(l).pT, photons.at(l).eta, photons.at(l).phi, 0.0);
-        double DRjet_ph = bJet.DeltaR(Photon);
+        float DRjet_ph = bJet.DeltaR(Photon);
         if(DRjet_ph<0.5) isGoodbJet=false;
         }
 
